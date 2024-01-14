@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
 
+/**Lớp quản lí các method liên quan đến get/set các thuộc tính trong preference.*/
 public class AppSetting {
 
     private static final String PREF_MUSIC_VOLUME = "volume";

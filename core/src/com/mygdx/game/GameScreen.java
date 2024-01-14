@@ -31,7 +31,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class GameScreen implements Screen {
     final MyGdxGame game;
-
+    boolean isPause = false; // quản lí pause game
     Texture dropImage;
     Texture bucketImage;
     Sound dropSound;
@@ -43,7 +43,7 @@ public class GameScreen implements Screen {
     int dropsGathered;
     boolean movingLeft = false;
     boolean movingRight = false;
-    Stage stage;
+    Stage stage;//quản lí UI
 
     public GameScreen(final MyGdxGame game) {
         this.game = game;
@@ -87,10 +87,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // clear the screen with a dark blue color. The
-        // arguments to clear are the red, green
-        // blue and alpha component in the range [0,1]
-        // of the color to be used to clear the screen.
+        //tô màu đen cho màn hình
         Gdx.gl.glClearColor(0f, 0f, 0f, 0);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
@@ -103,6 +100,7 @@ public class GameScreen implements Screen {
 
         // begin a new batch and draw the bucket and
         // all drops
+        // in ra các đối tượng game
         game.batch.begin();
         game.font.draw(game.batch, "Drops Collected: " + dropsGathered, 0, 480);
         game.batch.draw(bucketImage, bucket.x, bucket.y , bucket.width, bucket.height);
@@ -111,14 +109,15 @@ public class GameScreen implements Screen {
         }
         game.batch.end();
 
+        //in ra các đối tượng UI
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-        // process user input
 
-        if (movingLeft) {
+        // Update logic game
+        if (movingLeft && !isPause) {
             bucket.x -= 200 * Gdx.graphics.getDeltaTime();
         }
-        if (movingRight) {
+        if (movingRight && !isPause) {
             bucket.x += 200 * Gdx.graphics.getDeltaTime();
         }
 
@@ -128,31 +127,37 @@ public class GameScreen implements Screen {
         if (bucket.x > 800 - 64)
             bucket.x = 800 - 64;
 
-        // check if we need to create a new raindrop
-        if (TimeUtils.nanoTime() - lastDropTime > 1000000000)
+        // khi khoảng thời gian vượt quá 1s thì thêm 1 giọt nước
+        if (TimeUtils.nanoTime() - lastDropTime > 1000000000 && !isPause)
             spawnRaindrop();
 
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the bucket. In the later case we increase the
         // value our drops counter and add a sound effect.
-        Iterator<Rectangle> iter = raindrops.iterator();
-        while (iter.hasNext()) {
-            Rectangle raindrop = iter.next();
-            raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
-            if (raindrop.y + 64 < 0)
-                iter.remove();
-            if (raindrop.overlaps(bucket)) {
-                dropsGathered++;
-                if(game.setting.isSoundEffectsEnabled()){
-                    dropSound.play(game.setting.getSoundVolume());
+
+        // update vị trí toàn bộ giọt nước
+        if(!isPause) {
+            Iterator<Rectangle> iter = raindrops.iterator();
+            while (iter.hasNext()) {
+                Rectangle raindrop = iter.next();
+                raindrop.y -= 200 * Gdx.graphics.getDeltaTime();
+                // rơi ra ngoài màn hình
+                if (raindrop.y + 64 < 0)
+                    iter.remove();
+                // chạm vào xô
+                if (raindrop.overlaps(bucket)) {
+                    dropsGathered++;
+                    if (game.setting.isSoundEffectsEnabled()) {
+                        dropSound.play(game.setting.getSoundVolume());
+                    }
+                    iter.remove();
                 }
-                iter.remove();
             }
         }
 
+        //Back to Menu
         if (Gdx.input.isKeyPressed(Keys.P)) {
             game.setScreen(new MainMenuScreen(game));
-            dispose();
         }
     }
 
@@ -170,19 +175,31 @@ public class GameScreen implements Screen {
         pause.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return false;
+                if(!isPause) {
+                    pause();
+                    isPause = true; // Cập nhật trạng thái tạm dừng
+                } else {
+                    resume();
+                    isPause = false; // Cập nhật trạng thái tiếp tục
+                }
+
+                return true; // return true để logic game không xử lí input này nữa
             }
         });
         pause.setPosition(stage.getWidth() - pause.getWidth(), stage.getHeight() - pause.getHeight());
         stage.addActor(pause);
+
         if(game.setting.isMusicEnabled()) {
             rainMusic.setVolume(game.setting.getMusicVolume());
             rainMusic.play();
         }
 
         InputMultiplexer multiplexer = new InputMultiplexer();
-        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(stage);//ưu tiên xử lí input cho stage trước logic game.
         multiplexer.addProcessor(new InputAdapter() {
+
+            /**Xử lí input 2 phím di chuyển trái phải
+             * Update vị trí xô (200 pixel/s).*/
             @Override
             public boolean keyDown(int keycode) {
                 switch (keycode) {
@@ -209,37 +226,49 @@ public class GameScreen implements Screen {
                 return false;
             }
 
+            /**Xử lí input chuột bấm
+             * Update vị trí xô ở vị trí chuột.*/
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                if (!isPause) {
                     Vector3 touchPos = new Vector3();
                     touchPos.set(screenX, screenY, 0);
                     camera.unproject(touchPos);
                     bucket.x = touchPos.x - 64 / 2;
-                    return true;
+                }
+                return true;
             }
 
+            /**Xử lí input chuột giữ - kéo
+             * Update vị trí xô ở vị trí chuột.*/
             @Override
             public boolean touchDragged(int screenX, int screenY, int pointer) {
-                Vector3 touchPos = new Vector3();
-                touchPos.set(screenX, screenY, 0);
-                camera.unproject(touchPos);
-                bucket.x = touchPos.x - 64 / 2;
+                if (!isPause) {
+                    Vector3 touchPos = new Vector3();
+                    touchPos.set(screenX, screenY, 0);
+                    camera.unproject(touchPos);
+                    bucket.x = touchPos.x - 64 / 2;
+                }
                 return true;
             }
         });
+
         Gdx.input.setInputProcessor(multiplexer);
     }
 
     @Override
     public void hide() {
+
     }
 
     @Override
     public void pause() {
+        rainMusic.pause();
     }
 
     @Override
     public void resume() {
+        rainMusic.play();
     }
 
     @Override

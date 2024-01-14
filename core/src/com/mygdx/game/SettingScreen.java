@@ -10,18 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import java.awt.*;
-
 public class SettingScreen implements Screen {
 
     public MyGdxGame game;
-    private Stage stage;
-    // our new fields
-    private Label titleLabel;
-    private Label volumeMusicLabel;
-    private Label volumeSoundLabel;
-    private Label musicOnOffLabel;
-    private Label soundOnOffLabel;
+    private final Stage stage;
 
     public SettingScreen(final MyGdxGame game){
         this.game = game;
@@ -35,13 +27,14 @@ public class SettingScreen implements Screen {
         Skin skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 
         Table table = new Table();
-        titleLabel = new Label( "Preferences", skin, "title" );
-        volumeMusicLabel = new Label( "Music: ", skin );
-        volumeSoundLabel = new Label( "Sound: ", skin );
-        musicOnOffLabel = new Label( "Music: ", skin );
-        soundOnOffLabel = new Label( "Sound: ", skin );
+        // các nhãn văn bản
+        Label titleLabel = new Label("Preferences", skin, "title");
+        Label volumeMusicLabel = new Label("Music: ", skin);
+        Label volumeSoundLabel = new Label("Sound: ", skin);
+        Label musicOnOffLabel = new Label("Music: ", skin);
+        Label soundOnOffLabel = new Label("Sound: ", skin);
 
-        //volume
+        //tạo 2 thanh trượt chỉnh volume
         final Slider volumeMusicSlider = new Slider( 0f, 1f, 0.1f,false, skin );
         volumeMusicSlider.setValue( game.getPreferences().getMusicVolume() );
         volumeMusicSlider.addListener( new EventListener() {
@@ -62,6 +55,7 @@ public class SettingScreen implements Screen {
             }
         });
 
+        //tạo 2 thanh switch on/off
         final CheckBox musicCheckbox = new CheckBox(null, skin, "switch");
         musicCheckbox.setChecked( game.getPreferences().isMusicEnabled() );
         musicCheckbox.addListener( new EventListener() {
@@ -83,7 +77,8 @@ public class SettingScreen implements Screen {
                 return false;
             }
         });
-        // return to main screen button
+
+        //nút back to menu
         final TextButton backButton = new TextButton("Back", skin,"round"); // the extra argument here "small" is used to set the button to the smaller version instead of the big default version
         backButton.addListener(new ChangeListener() {
             @Override
