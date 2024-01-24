@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.Screens;
 
 import java.util.Iterator;
 
@@ -15,21 +15,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.MyGdxGame;
 
 
-public class GameScreen implements Screen {
+public class GameDemoScreen implements Screen {
     final MyGdxGame game;
     boolean isPause = false; // quản lí pause game
     Texture dropImage;
@@ -45,7 +42,7 @@ public class GameScreen implements Screen {
     boolean movingRight = false;
     Stage stage;//quản lí UI
 
-    public GameScreen(final MyGdxGame game) {
+    public GameDemoScreen(final MyGdxGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport());
         // load the images for the droplet and the bucket, 64x64 pixels each
@@ -156,7 +153,7 @@ public class GameScreen implements Screen {
         }
 
         //Back to Menu
-        if (Gdx.input.isKeyPressed(Keys.P)) {
+        if (Gdx.input.isKeyPressed(Keys.ESCAPE)) {
             game.setScreen(new MainMenuScreen(game));
         }
     }
@@ -258,7 +255,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void hide() {
-
+        dispose();
     }
 
     @Override
@@ -273,9 +270,16 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
+        // Giải phóng các texture
         dropImage.dispose();
         bucketImage.dispose();
+
+        // Giải phóng âm thanh và nhạc nền
         dropSound.dispose();
         rainMusic.dispose();
+
+        // Giải phóng stage (quản lý UI)
+        stage.dispose();
+
     }
 }

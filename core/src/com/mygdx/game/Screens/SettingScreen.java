@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.Screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -9,6 +9,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.Screens.MainMenuScreen;
 
 public class SettingScreen implements Screen {
 
@@ -132,7 +134,7 @@ public class SettingScreen implements Screen {
 
     @Override
     public void hide() {
-
+        this.dispose();
     }
 
     @Override

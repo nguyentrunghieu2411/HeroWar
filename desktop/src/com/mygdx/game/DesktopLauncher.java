@@ -8,6 +8,7 @@ import com.mygdx.game.MyGdxGame;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
+		config.setWindowedMode(800, 480);// set kích thước cửa sổ thành 800x600 pixels
 		config.setForegroundFPS(60);
 		config.setTitle("GAME");
 		new Lwjgl3Application(new MyGdxGame(), config);
