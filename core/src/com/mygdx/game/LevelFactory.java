@@ -1,7 +1,8 @@
-package com.mygdx.game.Map;
+package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
+import com.mygdx.game.Map.OpenSimplexNoise;
 import com.mygdx.game.Systems.RenderingSystem;
 import com.mygdx.game.Utils;
 import com.badlogic.ashley.core.Entity;
@@ -151,13 +152,64 @@ public class LevelFactory {
         animCom.animations.put(StateComponent.STATE_MOVING, anim);
         animCom.animations.put(StateComponent.STATE_JUMPING, anim);
         animCom.animations.put(StateComponent.STATE_FALLING, anim);
-        animCom.animations.put(StateComponent.STATE_HIT, anim);
+        animCom.animations.put(StateComponent.STATE_ATTACK, anim);
         anim.setPlayMode(Animation.PlayMode.LOOP);
 
         position.position.set(10,1,0);
         position.scale.x = 1.25f;
         position.scale.y = 1.25f;
         texture.region = tex;
+        type.type = TypeComponent.PLAYER;
+        stateCom.set(StateComponent.STATE_NORMAL);
+        b2dbody.body.setUserData(entity);
+
+        entity.add(b2dbody);
+        entity.add(position);
+        entity.add(texture);
+        entity.add(player);
+        entity.add(colComp);
+        entity.add(type);
+        entity.add(stateCom);
+        entity.add(animCom);
+
+        engine.addEntity(entity);
+        return entity;
+    }
+
+    public Entity createPlayer(TextureAtlas atlas, OrthographicCamera cam){
+
+        Entity entity = engine.createEntity();
+        BodyComponent b2dbody = engine.createComponent(BodyComponent.class);
+        PositionComponent position = engine.createComponent(PositionComponent.class);
+        TextureComponent texture = engine.createComponent(TextureComponent.class);
+        PlayerComponent player = engine.createComponent(PlayerComponent.class);
+        CollisionComponent colComp = engine.createComponent(CollisionComponent.class);
+        TypeComponent type = engine.createComponent(TypeComponent.class);
+        StateComponent stateCom = engine.createComponent(StateComponent.class);
+        AnimationComponent animCom = engine.createComponent(AnimationComponent.class);
+
+        player.cam = cam;
+        b2dbody.body = bodyFactory.makeCirclePolyBody(10,1,1, BodyFactory.STONE, BodyType.DynamicBody,true);
+        // set object position (x,y,z) z used to define draw order 0 first drawn
+        Animation<TextureRegion> idle = new Animation<>(0.1f,Utils.spriteSheetToFrames(atlas.findRegion("Combat Ready Idle"), 5 , 1));
+        Animation<TextureRegion> jump = new Animation<>(0.1f,Utils.spriteSheetToFrames(atlas.findRegion("Jump"), 4 , 1));
+        Animation<TextureRegion> fall = new Animation<>(0.1f,Utils.spriteSheetToFrames(atlas.findRegion("Fall"), 4 , 1));
+        Animation<TextureRegion> run = new Animation<>(0.1f,Utils.spriteSheetToFrames(atlas.findRegion("Run"), 6 , 1));
+        Animation<TextureRegion> attack = new Animation<>(0.1f,Utils.spriteSheetToFrames(atlas.findRegion("Attack 1"), 10 , 1));
+        Animation<TextureRegion> defend = new Animation<>(0.1f,Utils.spriteSheetToFrames(atlas.findRegion("Shield Raise"), 5 , 1));
+        animCom.animations.put(StateComponent.STATE_NORMAL, idle);
+        animCom.animations.put(StateComponent.STATE_MOVING, run);
+        animCom.animations.put(StateComponent.STATE_JUMPING, jump);
+        animCom.animations.put(StateComponent.STATE_FALLING, fall);
+        animCom.animations.put(StateComponent.STATE_ATTACK, attack);
+        animCom.animations.put(StateComponent.STATE_DEFEND, defend);
+        idle.setPlayMode(Animation.PlayMode.LOOP);
+        run.setPlayMode(Animation.PlayMode.LOOP);
+
+        position.position.set(10,1,0);
+        position.scale.x = 1.25f;
+        position.scale.y = 1.25f;
+        texture.region = idle.getKeyFrame(0);
         type.type = TypeComponent.PLAYER;
         stateCom.set(StateComponent.STATE_NORMAL);
         b2dbody.body.setUserData(entity);

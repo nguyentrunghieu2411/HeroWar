@@ -8,7 +8,8 @@ public class StateComponent implements Component, Poolable {
     public static final int STATE_JUMPING = 1;
     public static final int STATE_FALLING = 2;
     public static final int STATE_MOVING = 3;
-    public static final int STATE_HIT = 4;
+    public static final int STATE_ATTACK = 4;
+    public static final int STATE_DEFEND = 5;
 
     private int state = 0;
     public float time = 0.0f; // bộ đếm để xác định frame nào trong 1 animation

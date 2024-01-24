@@ -1,0 +1,35 @@
+swordMan.png
+size:2048,64
+repeat:none
+Attack 1
+bounds:484,28,400,30
+Attack 2
+bounds:2,28,480,30
+Attack 2 Recover
+bounds:1430,28,200,30
+Attack 3
+bounds:886,28,320,30
+Combat Ready Idle
+bounds:1900,34,110,24
+Fall
+bounds:962,2,88,24
+Hit Back
+bounds:246,2,132,24
+Hit Front
+bounds:1632,34,132,24
+Jump
+bounds:872,2,88,24
+Roll
+bounds:2,2,242,24
+Run
+bounds:514,2,132,24
+Shield Raise
+bounds:648,2,110,24
+Shield Raise Walk
+bounds:380,2,132,24
+Sword Channel
+bounds:760,2,110,24
+Sword Raise
+bounds:1208,34,220,24
+Walk
+bounds:1766,34,132,24

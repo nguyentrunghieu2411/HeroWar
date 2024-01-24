@@ -2,16 +2,13 @@ package com.mygdx.game.Systems;
 
 
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.mygdx.game.Components.PlayerComponent;
 import com.mygdx.game.Components.PositionComponent;
 import com.mygdx.game.Managers.Mapper;
-import com.mygdx.game.Map.LevelFactory;
-import javafx.geometry.Pos;
+import com.mygdx.game.LevelFactory;
 
 public class LevelGenerationSystem extends IteratingSystem {
 

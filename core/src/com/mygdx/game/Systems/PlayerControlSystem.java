@@ -1,20 +1,20 @@
 package com.mygdx.game.Systems;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.linearmath.ConvexH;
 import com.mygdx.game.Managers.KeyboardController;
 import com.mygdx.game.Components.BodyComponent;
 import com.mygdx.game.Components.PlayerComponent;
 import com.mygdx.game.Components.StateComponent;
 
-import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.mygdx.game.Managers.Mapper;
-import com.mygdx.game.Map.LevelFactory;
-
-import java.util.Map;
+import com.mygdx.game.LevelFactory;
+import jdk.nashorn.internal.runtime.ListAdapter;
 
 // cập nhật trạng thái và tốc độ của player khi nhận input
 public class PlayerControlSystem extends IteratingSystem{
@@ -41,26 +41,34 @@ public class PlayerControlSystem extends IteratingSystem{
         PlayerComponent player = Mapper.playerMapper.get(entity);
 
         player.timeSinceLastShot -= deltaTime;
+        player.timeSinceLastAttack -= deltaTime;
         //kiểm tra trạng thái của entity dựa trên tốc độ của nó
-
-        //nhảy
-        if(entityBody.body.getLinearVelocity().y > 0 && state.get() != StateComponent.STATE_FALLING){
-            state.set(StateComponent.STATE_FALLING);
-        }
-
-        // đang ở trên đất
-        if(entityBody.body.getLinearVelocity().y == 0){
+        //rơi
+        if(entityBody.body.getLinearVelocity().y < -0.01f){
+            if(state.get() != StateComponent.STATE_FALLING){
+                state.set(StateComponent.STATE_FALLING);
+                player.onPlatform = false;
+            }
+        } else if (entityBody.body.getLinearVelocity().y == 0f && player.onPlatform ){
+            // đang ở trên đất
             //tiếp đất sau khi nhảy
             if(state.get() == StateComponent.STATE_FALLING){
                 state.set(StateComponent.STATE_NORMAL);
             }
             // đang di chuyển trên đất
-            if(entityBody.body.getLinearVelocity().x != 0 && state.get() != StateComponent.STATE_MOVING){
+            if(entityBody.body.getLinearVelocity().x != 0f && state.get() != StateComponent.STATE_MOVING){
                 state.set(StateComponent.STATE_MOVING);
             }
         }
 
-        if(entityBody.body.getLinearVelocity().y < 0 && state.get() == StateComponent.STATE_FALLING){
+        if(entityBody.body.getLinearVelocity().x == 0 && player.onPlatform && !controller.isAttacking) {
+            if(state.get() != StateComponent.STATE_NORMAL){
+                state.set(StateComponent.STATE_NORMAL);
+            }
+        }
+
+
+        if(state.get() == StateComponent.STATE_FALLING){
             // player is actually falling. check if they are on platform
             if(player.onPlatform){
                 //overwrite old y value with 0 t stop falling but keep x vel
@@ -76,17 +84,23 @@ public class PlayerControlSystem extends IteratingSystem{
         }
 
 
-
         //khi ấn nút thì sẽ thay đổi vận tốc của entity
         if(controller.left){
             entityBody.body.setLinearVelocity(MathUtils.lerp(entityBody.body.getLinearVelocity().x, -5f, 0.2f),entityBody.body.getLinearVelocity().y);
+            if(player.IsDirectionRight){
+                player.IsDirectionRight = false;
+            }
         }
         if(controller.right){
             entityBody.body.setLinearVelocity(MathUtils.lerp(entityBody.body.getLinearVelocity().x, 5f, 0.2f),entityBody.body.getLinearVelocity().y);
+            if(!player.IsDirectionRight){
+                player.IsDirectionRight = true;
+            }
         }
 
         if(!controller.left && ! controller.right){
             entityBody.body.setLinearVelocity(MathUtils.lerp(entityBody.body.getLinearVelocity().x, 0, 0.1f),entityBody.body.getLinearVelocity().y);
+
         }
 
         if(controller.up &&
@@ -94,6 +108,23 @@ public class PlayerControlSystem extends IteratingSystem{
             //b2body.body.applyForceToCenter(0, 3000,true);
             entityBody.body.applyLinearImpulse(0, 75f, entityBody.body.getWorldCenter().x,entityBody.body.getWorldCenter().y, true);
             state.set(StateComponent.STATE_JUMPING);
+            player.onPlatform = false;
+        }
+
+        if(controller.isAttacking){
+            if (player.timeSinceLastAttack < 0 && state.get() == StateComponent.STATE_NORMAL){
+                state.set(StateComponent.STATE_ATTACK);
+                player.timeSinceLastAttack = player.attackDelay;
+            }
+            if(player.timeSinceLastAttack < 0f) {
+                controller.isAttacking = false;
+            }
+        }
+
+        if(controller.isDefending){
+            if(state.get() == StateComponent.STATE_NORMAL) {
+                state.set(StateComponent.STATE_DEFEND);
+            }
         }
 
         if(controller.isMouse1Down){ // if mouse button is pressed

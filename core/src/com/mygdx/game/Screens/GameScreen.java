@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas.AtlasRegion;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.Managers.KeyboardController;
-import com.mygdx.game.Map.LevelFactory;
+import com.mygdx.game.LevelFactory;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.Physics.GameContactListener;
 import com.mygdx.game.Systems.*;
@@ -32,7 +32,7 @@ public class GameScreen implements Screen {
     private final LevelFactory lvlFactory;
     public AtlasRegion playerTexture;
     MyGdxGame game;
-
+    public TextureAtlas knight;
     SpriteBatch batch;
 
     private final OrthographicCamera cam;
@@ -46,6 +46,7 @@ public class GameScreen implements Screen {
         game.assetManager.queueAddSounds();
         game.assetManager.manager.finishLoading();
         atlas = game.assetManager.manager.get("images/game.atlas", TextureAtlas.class);
+        knight = game.assetManager.manager.get("images/swordMan.atlas",TextureAtlas.class);
         ping = game.assetManager.manager.get("sound/ping.mp3");
         waterSound = game.assetManager.manager.get("sound/water.wav");
 
@@ -64,11 +65,12 @@ public class GameScreen implements Screen {
         engine.addSystem(new AnimationSystem());
         engine.addSystem(new PhysicsSystem(lvlFactory.world, engine));
         engine.addSystem(renderingSystem);
-        engine.addSystem(new PhysicsDebugSystem(lvlFactory.world, renderingSystem.getCamera()));
+        engine.addSystem(new PhysicsDebugSystem(lvlFactory.world, cam));
         engine.addSystem(new CollisionSystem());
         engine.addSystem(new PlayerControlSystem(controller,lvlFactory));
         engine.addSystem(new EnemySystem());
-        Entity player = lvlFactory.createPlayer(atlas.findRegion("player"),cam);
+        //Entity player = lvlFactory.createPlayer(atlas.findRegion("player"),cam);
+        Entity player = lvlFactory.createPlayer(knight,cam);
         engine.addSystem(new WaterFloorSystem(player));
         engine.addSystem(new WallSystem(player));
         engine.addSystem(new BulletSystem(player));

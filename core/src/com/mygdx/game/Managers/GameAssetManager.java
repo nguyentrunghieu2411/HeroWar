@@ -19,6 +19,7 @@ public class GameAssetManager {
     // Music
     public final String playingSong = "music/rain.mp3";
     public final String skin = "skin/uiskin.json";
+    private final String playerImages = "images/swordMan.atlas";
 
 
     public GameAssetManager() {
@@ -31,6 +32,7 @@ public class GameAssetManager {
 //    }
     public void queueAddImages(){
         manager.load(gameImages, TextureAtlas.class);
+        manager.load(playerImages, TextureAtlas.class);
     }
 
     public void queueAddLoadingImages(){

@@ -1,4 +1,5 @@
 package com.mygdx.game.Systems;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.Components.PlayerComponent;
 import com.mygdx.game.Components.TextureComponent;
 import com.mygdx.game.Components.PositionComponent;
@@ -55,7 +56,7 @@ public class RenderingSystem extends SortedIteratingSystem{
     private OrthographicCamera cam; // a reference to our camera
 
     // component mappers to get components from entities
-
+    private TextureRegion texture;
 
     @SuppressWarnings("unchecked")
     public RenderingSystem(SpriteBatch batch) {
@@ -97,7 +98,11 @@ public class RenderingSystem extends SortedIteratingSystem{
             }
 
             if(player != null) {
+                texture = new TextureRegion(tex.region);
                 cam.position.set(p.position.x, p.position.y + 3, 0);
+                if(!player.IsDirectionRight) {
+                    texture.flip(true,false);
+                }
             }
 
             float width = tex.region.getRegionWidth();
@@ -106,12 +111,24 @@ public class RenderingSystem extends SortedIteratingSystem{
             float originX = width/2f;
             float originY = height/2f;
 
-            batch.draw(tex.region,
-                    p.position.x - originX, p.position.y - originY,
-                    originX, originY,
-                    width, height,
-                    PixelsToMeters(p.scale.x), PixelsToMeters(p.scale.y),
-                    p.rotation);
+            if(player == null) {
+                batch.draw(tex.region,
+                        p.position.x - originX, p.position.y - originY,
+                        originX, originY,
+                        width, height,
+                        PixelsToMeters(p.scale.x), PixelsToMeters(p.scale.y),
+                        p.rotation);
+            }
+            else {
+                batch.draw(texture,
+                        p.position.x - originX, p.position.y - originY,
+                        originX, originY,
+                        width, height,
+                        PixelsToMeters(p.scale.x), PixelsToMeters(p.scale.y),
+                        p.rotation);
+            }
+
+
         }
 
         batch.end();

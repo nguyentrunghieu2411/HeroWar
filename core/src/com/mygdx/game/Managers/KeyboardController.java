@@ -14,6 +14,8 @@ public class KeyboardController implements InputProcessor {
 
     public boolean isMouse1Down, isMouse2Down,isMouse3Down; //left right mid
     public boolean isDragged;
+    public boolean isAttacking;
+    public boolean isDefending;
     public Vector2 mouseLocation = new Vector2();
 
     @Override
@@ -36,6 +38,16 @@ public class KeyboardController implements InputProcessor {
             case Keys.DOWN: 	// if keycode is the same as Keys.LEFT a.k.a 20
                 down = true;	// do this
                 keyProcessed = true;// we have reacted to a keypress
+                break;
+            case Keys.A: {
+                isAttacking = true;
+                keyProcessed = true;
+                break;
+            }
+            case Keys.Q:
+                isDefending = true;
+                keyProcessed = true;
+                break;
         }
         return keyProcessed;	//  return our peyProcessed flag
     }
@@ -59,6 +71,14 @@ public class KeyboardController implements InputProcessor {
             case Keys.DOWN: 	// if keycode is the same as Keys.LEFT a.k.a 20
                 down = false;	// do this
                 keyProcessed = true;	// we have reacted to a keypress
+                break;
+//            case Keys.A:
+//                isAttacking = false;
+//                keyProcessed = true;
+            case Keys.Q:
+                isDefending = false;
+                keyProcessed = true;
+                break;
         }
         return keyProcessed;	//  return our peyProcessed flag
     }
